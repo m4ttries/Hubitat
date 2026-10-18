@@ -50,7 +50,7 @@ import java.math.RoundingMode
     [attr: "batteryDischargePower", key: "6100_00496A00", unit: "W"],
     [attr: "batteryTemperature",    key: "6100_40495B00", unit: "°C", factor: 10],
     [attr: "inverterStatus",        key: "6180_08214800", tag: true],
-    [attr: "gridRelayStatus",       key: "6180_08416500", tag: true],
+    [attr: "gridRelayStatus",       key: "6180_08416400", tag: true],
 ]
 
 @Field static final String KEY_SERIAL = "6800_00A21E00"

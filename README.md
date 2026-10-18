@@ -25,7 +25,34 @@ Attributes your inverter doesn't support stay blank. At night, or while the inve
 2. Go to **Devices → Add Device → Virtual**, name it, and choose **SMA Sunny Boy Inverter** as the type.
 3. Enter the inverter's IP address and password and click **Save Preferences**.
 
-> Notes: Give the inverter a fixed IP address (a DHCP reservation). SMA inverters allow only a few logins at once. If you see "too many open sessions", wait a few minutes for old ones to expire. Newer SMA models built on ennexOS (Sunny Tripower X, Sunny Boy Smart Energy) use a different API and aren't supported, the same as in Home Assistant.
+> Notes: Give the inverter a fixed IP address (a DHCP reservation). SMA inverters allow only a few logins at once. If you see "too many open sessions", wait a few minutes for old ones to expire. Newer SMA models built on ennexOS (Sunny Tripower X, Sunny Boy Smart Energy) use a different API: use the SMA ennexOS Inverter driver below instead.
+
+## SMA ennexOS Inverter (`drivers/SmaEnnexOS.groovy`)
+
+A device driver for newer SMA inverters built on ennexOS, such as the Sunny Tripower X and Sunny Boy Smart Energy. It reads the inverter's local web API, the same one its own web page and the Home Assistant **SMA Devices Plus** integration use. It needs no cloud account.
+
+**Preferences**
+- **IP address**, **username**, and **password**: a user account from the inverter's web page.
+- **Use HTTPS**: leave on unless your inverter only serves HTTP. Self-signed certificates are accepted.
+- **Poll interval**: 15 seconds to 15 minutes.
+- **Report as Energy**: whether the standard `energy` attribute shows lifetime or today's yield.
+
+**What it reports**
+- `power` (AC output, W), `pvPower`, `energy` (kWh), `voltage`, `dailyYield`, `totalYield`
+- PV strings A/B/C: `pvPowerA-C`, `pvVoltageA-C`, `pvCurrentA-C`
+- Grid: `frequency`, per-phase `voltageL1-3`, `currentL1-3`, `powerL1-3`, `gridRelayStatus`
+- `inverterStatus` (Ok, Warning, Fault), `operatingStatus` (MPP, Standby, Derating, ...), `inverterTemperature`, `connection`, `lastUpdate`
+- With an energy meter: `gridPowerSupplied`, `gridPowerAbsorbed`, `gridTotalSupplied`, `gridTotalAbsorbed`
+- With a battery: `batterySoc`, `batteryChargePower`, `batteryDischargePower`, `batteryTemperature`
+
+Attributes your inverter doesn't support stay blank. At night, or while the inverter is unreachable, power and current read 0. If your inverter has no daily yield value of its own, the driver counts it from lifetime yield. On the first day it counts from when the driver was installed.
+
+**Install**
+1. In Hubitat, go to **Drivers Code → New Driver**, paste in `drivers/SmaEnnexOS.groovy`, and click **Save**.
+2. Go to **Devices → Add Device → Virtual**, name it, and choose **SMA ennexOS Inverter** as the type.
+3. Enter the inverter's IP address, username, and password and click **Save Preferences**.
+
+> Missing a value? Click **Discover** on the device page. It writes every value the inverter reports to the Hubitat log (**Logs**), which shows the name to map.
 
 ## Sprinkler Blowout (`apps/SprinklerBlowout.groovy`)
 
