@@ -1,5 +1,32 @@
 # Hubitat Apps
 
+## SMA Sunny Boy Inverter (`drivers/SmaSunnyBoy.groovy`)
+
+A device driver that reads your SMA solar inverter over the local network, the same way the Home Assistant **SMA Solar** integration does (the inverter's WebConnect JSON API, as used by pysma). It needs no cloud account and works with Sunny Boy, Sunny Tripower, Sunny Boy Storage, and Sunny Island models that have WebConnect.
+
+**Preferences**
+- **IP address**, **password**, and **user group** (User or Installer): the same login you use for the inverter's web page.
+- **Use HTTPS**: leave on unless your inverter only serves HTTP. Self-signed certificates are accepted.
+- **Poll interval**: 15 seconds to 15 minutes.
+- **Report as Energy**: whether the standard `energy` attribute shows lifetime or today's yield.
+
+**What it reports**
+- `power` (AC output, W), `energy` (kWh), `voltage`, `dailyYield`, `totalYield`
+- PV strings A/B: `pvPowerA/B`, `pvVoltageA/B`, `pvCurrentA/B`
+- Grid: `frequency`, per-phase `voltageL1-3`, `currentL1-3`, `powerL1-3`, `gridRelayStatus`
+- `inverterStatus` (Ok, Warning, Fault, Off), `connection` (online or offline), `lastUpdate`
+- If you have an SMA Energy Meter: `gridPowerSupplied`, `gridPowerAbsorbed`, `gridTotalSupplied`, `gridTotalAbsorbed`
+- If you have an SMA battery: `batterySoc`, `batteryChargePower`, `batteryDischargePower`, `batteryTemperature`
+
+Attributes your inverter doesn't support stay blank. At night, or while the inverter is unreachable, power and current read 0.
+
+**Install**
+1. In Hubitat, go to **Drivers Code → New Driver**, paste in `drivers/SmaSunnyBoy.groovy`, and click **Save**.
+2. Go to **Devices → Add Device → Virtual**, name it, and choose **SMA Sunny Boy Inverter** as the type.
+3. Enter the inverter's IP address and password and click **Save Preferences**.
+
+> Notes: Give the inverter a fixed IP address (a DHCP reservation). SMA inverters allow only a few logins at once. If you see "too many open sessions", wait a few minutes for old ones to expire. Newer SMA models built on ennexOS (Sunny Tripower X, Sunny Boy Smart Energy) use a different API and aren't supported, the same as in Home Assistant.
+
 ## Sprinkler Blowout (`apps/SprinklerBlowout.groovy`)
 
 Runs your irrigation zones for a compressed-air winterization blowout.
