@@ -11,7 +11,7 @@ A 3D-printable frame that goes all the way around the tablet and holds it **hori
 ## Design
 - **Two parts.** The **tray** screws to the wall and the tablet drops into it. The **bezel** is a front frame that **snaps on, with no screws**, and covers everything except the screen. It has a notch so the front camera isn't covered.
 - **Hidden plug pockets.** Each side has a 22 mm pocket, the same width left and right, so the tablet sits centred in the frame. The right pocket hides a **90° USB-C plug**, which can point up or down. The pocket runs the full height of the tablet, so it works wherever the port is along that edge. The pocket floor is only 2 mm thick, and there is a 2 mm recess under the bezel, giving the plug about 13 mm of depth in total.
-- **Cable exit.** The cable can leave through a slot in the bottom edge. Or, if you want to run it into the wall, through a 12 mm hole in the back (`wall_hole_d`, set it to 0 to remove the hole).
+- **Cable exit.** Power runs out the back. A 12 × 24 mm opening in the back of the right pocket sits just past the plug tip, and it's big enough to thread a USB-A or USB-C plug through to a power point behind the wall. If your plug points up instead of down, set `plug_dir = "up"`.
 - **Snap fit.** Twelve flexible tabs on the underside of the bezel (4 top, 4 bottom, 2 on each side) sit flush in recesses in the tray's outer walls. Their barbs click into a catch groove, so nothing shows on the front.
   - **To remove the bezel:** each recess goes 1.5 mm below its tab's tip. Slip a small flat screwdriver in there and lever the tab outward, one tab at a time.
   - **To adjust the fit:** `barb` (0.9 mm) sets how tight it grips, `snap_t` (1.8 mm) how stiff each tab is, and `snap_gap` the clearance around the tab.

@@ -53,7 +53,7 @@ pocket_floor = 2;   // back plate under the pockets (plug can sit lower)
 // soft    : deep roundover, larger bevel to the screen, big corners (bezel 2 mm thicker)
 // frame_sq        : "frame" with square outer corners
 // frame_sq_window : "frame" with square outer corners AND a square screen opening
-edge_style = "sharp";
+edge_style = "frame_sq_window";   // chosen: option 4b
 // [bezel_t, corner_r, front_type, front_size, inner_bevel, back_chamfer, window_r]
 style = edge_style == "chamfer"   ? [3, 8,   "chamfer", 2, 0,   1, 3]
       : edge_style == "round"     ? [4, 10,  "round",   3, 0,   1, 3]
@@ -71,14 +71,24 @@ back_ch   = style[5];   // chamfer on the wall-side edge (makes it look thinner)
 window_r  = style[6];   // corner radius of the screen opening
 overlap  = screen_border - 0.5; // bezel covers the black border, stopping just short of the screen
 pocket_relief = 2;  // recess under the bezel above the pockets
-cam_notch_w = 26;   // bezel notch around the front camera (top middle)
-cam_margin  = 4.5;  // notch extends this far beyond the camera centre (toward the top edge)
+// Camera opening in the bezel (all styles get the same 45-degree bevel as the screen)
+// rect  : small square-cornered notch off the screen opening
+// u     : notch with a rounded end around the camera
+// round : separate round "porthole" over the camera, bezel bridges the gap
+// pill  : separate pill-shaped slot (room for a light sensor beside the lens)
+cam_style = "rect";
+cam_w     = 14;     // notch width (rect) / notch width (u) / slot length (pill)
+cam_d     = 7;      // porthole / pill diameter; also the u-notch end diameter
+cam_margin = 3.5;   // rect: how far the notch extends past the camera centre
 corner_stop = 11;   // side stops at the corners keep the tablet from sliding
                     // into the pockets (they leave the middle of each edge open)
 
 /* [Cable] */
-cable_slot_w = 7;   // slot through the bottom edge (cable ~3.5-4.5 mm)
-wall_hole_d  = 12;  // hole through the back of the right pocket, 30 mm below the port; 0 = none
+// Power comes from behind the mount: the cable leaves the right pocket through
+// a slot in the back. The slot is big enough to thread a USB-A/C plug through.
+plug_dir   = "down"; // which way your 90-degree plug points along the edge: "down" | "up"
+plug_reach = 22;     // how far the plug body extends along the edge from the port centre
+back_slot  = [12, 24]; // back opening size [across, along the edge]
 
 /* [Snap fit] */
 snap_w  = 18;       // width of each snap tab
@@ -203,12 +213,9 @@ module tray() {
             translate([0, 0, -1]) linear_extrude(back_t + 2)
                 rrect(s[0], 34, s[1] - s[0], H - 68, 6);
 
-        // cable slot through the bottom edge, below the right pocket
-        translate([W + pocket_w/2 - cable_slot_w/2, Y0 - 1, -eps])
-            cube([cable_slot_w, border + corner_stop + 2, DT + 1]);
-        // optional hole straight into the wall behind the right pocket
-        if (wall_hole_d > 0)
-            translate([W + pocket_w/2, clear/2 + port_y - 30, -1]) cylinder(d = wall_hole_d, h = pocket_floor + 2);
+        // cable opening through the back of the right pocket, just past the plug's tip
+        translate([W + pocket_w/2, back_slot_y, -1]) linear_extrude(pocket_floor + 2)
+            rrect(-back_slot[0]/2, -back_slot[1]/2, back_slot[0], back_slot[1], back_slot[0]/2 - 0.01);
 
         // wall screws, countersunk into the floor of the tablet cavity
         for (p = wall_screws) translate([p[0], p[1], 0]) {
@@ -221,6 +228,35 @@ module tray() {
     }
 }
 
+// centre of the back cable opening (cavity coordinates)
+// (kept fully inside the pocket so it always goes cleanly through)
+back_slot_y = plug_dir == "down"
+    ? max(clear/2 + port_y - plug_reach - 2 - back_slot[1]/2, 1 + back_slot[1]/2)
+    : min(clear/2 + port_y + plug_reach + 2 + back_slot[1]/2, H - 1 - back_slot[1]/2);
+
+// ---------------------------------------------------------------- camera opening
+cam_cx = clear/2 + cam_x;
+cam_cy = clear/2 + tab_h - cam_y;
+module cam_shape() {
+    if (cam_style == "rect")
+        translate([cam_cx - cam_w/2, H - overlap - 1]) square([cam_w, cam_cy + cam_margin - (H - overlap - 1)]);
+    else if (cam_style == "u")
+        hull() {
+            translate([cam_cx - cam_d/2, H - overlap - 1]) square([cam_d, 1]);
+            translate([cam_cx, cam_cy]) circle(d = cam_d);
+        }
+    else if (cam_style == "round")
+        translate([cam_cx, cam_cy]) circle(d = cam_d);
+    else if (cam_style == "pill")
+        hull() for (dx = [-1, 1]) translate([cam_cx + dx*(cam_w - cam_d)/2, cam_cy]) circle(d = cam_d);
+}
+module cam_opening() {
+    hull() {
+        translate([0, 0, DT - 1]) linear_extrude(bezel_t + 1 - inner_bev + 0.01) cam_shape();
+        translate([0, 0, ZT - 0.01]) linear_extrude(1) offset(delta = inner_bev) cam_shape();
+    }
+}
+
 // ---------------------------------------------------------------- bezel
 // modelled in place (z = DT .. DT + bezel_t)
 module bezel() {
@@ -228,9 +264,8 @@ module bezel() {
         frame_layer(DT, ZT);
         // screen window
         screen_window();
-        // camera notch, top middle
-        translate([clear/2 + cam_x - cam_notch_w/2, H - overlap - 1, DT - 1])
-            cube([cam_notch_w, overlap + 1 - (cam_y - cam_margin) - clear/2, bezel_t + 2]);
+        // camera opening, top middle
+        cam_opening();
         // relief over the pockets so a chunky plug fits
         for (px = [-pocket_w, W])
             translate([px, 0, DT - eps]) cube([pocket_w, H, pocket_relief]);
