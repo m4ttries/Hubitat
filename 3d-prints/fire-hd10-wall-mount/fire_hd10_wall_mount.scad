@@ -25,10 +25,17 @@ part = "assembly";  // assembly | tray | tray_left | tray_right | bezel | bezel_
 show_tablet = true; // assembly preview only
 
 /* [Tablet] */
-tab_w = 247.1;      // landscape width  (Amazon spec 9.73")
-tab_h = 165.9;      // landscape height (Amazon spec 6.53")
-tab_t = 8.6;        // thickness        (Amazon spec 0.34")
-clear   = 0.8;      // clearance added to width and height
+// Measured by the owner (letters refer to docs/tablet_dimensions.png)
+tab_w = 246;        // A  landscape width
+tab_h = 165;        // B  landscape height (measured tight, so clearance is generous)
+tab_t = 8.5;        // C  thickness
+screen_border = 14.7; // E/F/G/H  black border, edge of tablet -> lit screen (all four sides)
+cam_x  = 123;       // J  camera centre from the tablet's left edge
+port_y = 45.5;      // L  USB-C centre from the tablet's bottom edge (approx.)
+                    // M  USB-C centre is mid-thickness (C/2)
+                    // N = 19.3, P = 40.2: buttons start 19.3 mm from the top edge
+                    //     and span 40.2 mm (covered by the bezel)
+clear   = 1.0;      // clearance added to width and height
 clear_t = 0.6;      // clearance added to thickness (add more for a skin)
 
 /* [Frame] */
@@ -38,7 +45,7 @@ border   = 14;      // top / bottom border width
 back_t   = 4;       // back plate under the tablet
 pocket_floor = 2;   // back plate under the pockets (plug can sit lower)
 bezel_t  = 3;       // front frame thickness
-overlap  = 7;       // how far the bezel covers the tablet's black border
+overlap  = screen_border - 0.5; // bezel covers the black border, stopping just short of the screen
 pocket_relief = 2;  // recess under the bezel above the pockets
 cam_notch_w = 26;   // bezel notch around the front camera (top middle)
 corner_stop = 11;   // side stops at the corners keep the tablet from sliding
@@ -46,7 +53,7 @@ corner_stop = 11;   // side stops at the corners keep the tablet from sliding
 
 /* [Cable] */
 cable_slot_w = 7;   // slot through the bottom edge (cable ~3.5-4.5 mm)
-wall_hole_d  = 12;  // hole through the back of the right pocket; 0 = none
+wall_hole_d  = 12;  // hole through the back of the right pocket, 30 mm below the port; 0 = none
 
 /* [Snap fit] */
 snap_w  = 18;       // width of each snap tab
@@ -142,7 +149,7 @@ module tray() {
             cube([cable_slot_w, border + corner_stop + 2, DT + 1]);
         // optional hole straight into the wall behind the right pocket
         if (wall_hole_d > 0)
-            translate([W + pocket_w/2, H/2, -1]) cylinder(d = wall_hole_d, h = pocket_floor + 2);
+            translate([W + pocket_w/2, clear/2 + port_y - 30, -1]) cylinder(d = wall_hole_d, h = pocket_floor + 2);
 
         // wall screws, countersunk into the floor of the tablet cavity
         for (p = wall_screws) translate([p[0], p[1], 0]) {
@@ -164,8 +171,8 @@ module bezel() {
         translate([0, 0, DT - 1]) linear_extrude(bezel_t + 2)
             rrect(overlap, overlap, W - 2*overlap, H - 2*overlap, 3);
         // camera notch, top middle
-        translate([W/2 - cam_notch_w/2, H - overlap - 1, DT - 1])
-            cube([cam_notch_w, overlap - 1.5, bezel_t + 2]);
+        translate([clear/2 + cam_x - cam_notch_w/2, H - overlap - 1, DT - 1])
+            cube([cam_notch_w, overlap - 2.5, bezel_t + 2]);
         // relief over the pockets so a chunky plug fits
         for (px = [-pocket_w, W])
             translate([px, 0, DT - eps]) cube([pocket_w, H, pocket_relief]);
@@ -201,9 +208,9 @@ module print_bezel() { translate([0, 0, DT + bezel_t]) mirror([0, 0, 1]) childre
 module ghost() {
     color("DimGray") translate([clear/2, clear/2, back_t]) linear_extrude(tab_t)
         rrect(0, 0, tab_w, tab_h, 9);
-    color("Black") translate([W/2, H - 7.5, back_t + tab_t]) cylinder(d = 3, h = 0.3);
+    color("Black") translate([clear/2 + cam_x, clear/2 + tab_h - 7.5, back_t + tab_t]) cylinder(d = 3, h = 0.3);
     // 90-degree USB-C plug, cable running down
-    color("White") translate([W, H*0.55, back_t + tab_t/2]) {
+    color("White") translate([W, clear/2 + port_y, back_t + tab_t/2]) {
         translate([0, -4, -1.6]) cube([5, 8, 3.2]);
         translate([5, -22, -5]) cube([10, 30, 10]);
         translate([10, -60, 0]) rotate([-90, 0, 0]) cylinder(d = 4, h = 40);

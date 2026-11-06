@@ -114,8 +114,8 @@
       <text x="0" y="158" class="lbl" font-size="16">J / K</text><text x="70" y="158" class="td">Camera centre from left edge / from top edge</text><text x="540" y="158" class="td">123.6 / 7.5</text>
       <text x="0" y="180" class="lbl" font-size="16">L / M</text><text x="70" y="180" class="td">USB-C centre from bottom edge / from back face</text><text x="540" y="180" class="td">any / 4.3</text>
       <text x="0" y="202" class="lbl" font-size="16">N / P</text><text x="70" y="202" class="td">Buttons: start from top edge / total span</text><text x="540" y="202" class="td">covered</text>
-      <text x="0" y="224" class="lbl" font-size="16">Q/R/S</text><text x="70" y="224" class="td">Plug: out from edge / body length / thickness</text><text x="540" y="224" class="td">≤20 / ≤30 / ≤10</text>
+      <text x="0" y="224" class="lbl" font-size="16">Q/R/S</text><text x="70" y="224" class="td">Plug: out from edge / body length / thickness</text><text x="540" y="224" class="td">≤20 / ≤30 / ≤10</text><text x="690" y="26" class="td" font-weight="700">246</text><text x="690" y="48" class="td" font-weight="700">165 (tight)</text><text x="690" y="70" class="td" font-weight="700">8.5</text><text x="690" y="92" class="td" font-weight="700">—</text><text x="690" y="114" class="td" font-weight="700">14.7 / 14.7</text><text x="690" y="136" class="td" font-weight="700">14.7 / 14.7</text><text x="690" y="158" class="td" font-weight="700">123 / —</text><text x="690" y="180" class="td" font-weight="700">45.5 (approx.) / C÷2</text><text x="690" y="202" class="td" font-weight="700">19.3 / 40.2</text><text x="690" y="224" class="td" font-weight="700">—</text>
     </g>
-    <text x="0" y="256" class="note">* The faceplate currently covers a fixed 7 mm on every side. With E–H it can cover exactly the black border, right up to the screen.</text>
+    <text x="0" y="256" class="note">* Faceplate now covers 14.2 mm per side (E–H minus 0.5 mm), so it hides the black border without touching the screen.</text>
   </g>
 </svg>

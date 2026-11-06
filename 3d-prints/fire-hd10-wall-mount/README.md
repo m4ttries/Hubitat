@@ -47,8 +47,32 @@ About 304 × 195 × 16 mm (the tray is 13.2 mm deep and the bezel 3 mm).
 
 The power and volume buttons are covered once the bezel is on. That's normal for a mounted dashboard (tap the screen to wake it). Take the bezel off if you need to press them.
 
+## Measured dimensions
+These are the owner's measurements, entered into `fire_hd10_wall_mount.scad`. The letters match [`docs/tablet_dimensions.png`](docs/tablet_dimensions.png).
+
+| Letter | What | mm | In the model |
+|---|---|---|---|
+| A | Overall width | 246 | `tab_w` |
+| B | Overall height (measured tight) | 165 | `tab_h` |
+| C | Thickness | 8.5 | `tab_t` |
+| D | Corner radius | not measured (9 assumed) | preview only |
+| E/F/G/H | Black border to lit screen, all four sides | 14.7 | `screen_border` |
+| J | Camera centre from left edge | 123 | `cam_x` |
+| K | Camera centre from top edge | not measured | covered by the 26 mm notch |
+| L | USB-C centre from bottom edge | 45.5 (approx.) | `port_y` |
+| M | USB-C centre from back face | C / 2 | |
+| N | Buttons start, from top edge | 19.3 | covered by the bezel |
+| P | Button span | 40.2 | covered by the bezel |
+| Q/R/S | 90° plug: out from edge / body length / thickness | not measured | pocket allows ≤20 / any / ≤10 |
+
+How the model uses them:
+- **Clearance:** 1.0 mm is added to the width and height, because B was a tight measurement. 0.6 mm is added to the thickness.
+- **Screen opening:** the bezel covers 14.2 mm on every side. That stops 0.5 mm short of the lit screen, so no screen is hidden even if the tablet shifts in its clearance.
+- **Corner stops:** they run 11 mm in from each corner. That clears the buttons (from 19.3 mm) and the port (at 45.5 mm).
+- **Wall hole:** the hole for running the cable into the wall sits 30 mm below the port. A plug pointing down can feed straight into it.
+
 ## Adjusting
-The tablet size is set to Amazon's listed 247.1 × 165.9 × 8.6 mm, plus clearance. **Measure your tablet first.** If your plug is wider than about 20 mm or thicker than about 10 mm, increase `pocket_w` or `pocket_relief`.
+If your plug is wider than about 20 mm or thicker than about 10 mm, increase `pocket_w` or `pocket_relief`.
 
 To export a part:
 
