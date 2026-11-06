@@ -2,8 +2,12 @@
 // -----------------------------------------------------------------------------
 // Two parts:
 //   TRAY  - screws to the wall; the tablet drops into it face-up.
-//   BEZEL - a front frame that screws onto the tray and covers everything
-//           except the screen (with a notch for the front camera).
+//   BEZEL - a front frame that SNAPS onto the tray (no screws) and covers
+//           everything except the screen (with a notch for the front camera).
+//           Flexible tabs on its underside sit flush in recesses in the tray's
+//           outer walls and their barbs click into a catch groove. To remove,
+//           slip a small flat screwdriver into the gap below a tab's tip and
+//           lever the tab outward.
 // Both sides of the tablet have an equal hidden pocket, so the tablet sits
 // centred in the frame. The right pocket holds a 90-degree USB-C plug; the
 // cable leaves through a slot in the bottom edge or a hole in the back
@@ -14,8 +18,8 @@
 //
 // The frame is ~303 x 196 mm, so every part also comes as left/right halves
 // that fit a 220 mm bed. Tray halves overlap in a lap joint clamped by the
-// centre wall screws. Bezel halves butt together at the centre, and each
-// half is screwed to the tray on both sides of the seam.
+// centre wall screws. Bezel halves butt together at the centre; each half
+// has its own snap tabs on both sides of the seam.
 
 part = "assembly";  // assembly | tray | tray_left | tray_right | bezel | bezel_left | bezel_right
 show_tablet = true; // assembly preview only
@@ -29,7 +33,7 @@ clear_t = 0.6;      // clearance added to thickness (add more for a skin)
 
 /* [Frame] */
 pocket_w = 22;      // hidden pocket each side (room for the 90-degree plug)
-outer    = 5;       // outer wall thickness
+outer    = 6;       // outer wall thickness (houses the snap recesses)
 border   = 14;      // top / bottom border width
 back_t   = 4;       // back plate under the tablet
 pocket_floor = 2;   // back plate under the pockets (plug can sit lower)
@@ -44,10 +48,17 @@ corner_stop = 11;   // side stops at the corners keep the tablet from sliding
 cable_slot_w = 7;   // slot through the bottom edge (cable ~3.5-4.5 mm)
 wall_hole_d  = 12;  // hole through the back of the right pocket; 0 = none
 
-/* [Screws] */
+/* [Snap fit] */
+snap_w  = 18;       // width of each snap tab
+snap_t  = 1.8;      // tab thickness (flex) - print in PETG for best results
+snap_len = 11;       // tab length below the bezel
+barb    = 0.9;      // barb depth (how far it hooks into the catch)
+barb_h  = 2.5;      // barb height (lead-in ramp length)
+snap_gap = 0.3;     // clearance around the tab in its recess
+pry_gap = 1.5;      // recess extends this far below the tab tip, for prying
+
+/* [Wall screws] */
 wall_screw_d = 4.5; wall_head_d = 9;    // 4 mm / #8 wood screws
-m3_pilot = 2.6;     // M3 self-tapping / machine screw into plastic
-m3_clear = 3.4; m3_head = 6.4;
 
 $fn = 48;
 eps = 0.01;
@@ -69,9 +80,38 @@ module rslab(x, y, w, h, z0, z1, r = 3) {
     translate([0, 0, z0]) linear_extrude(z1 - z0) rrect(x, y, w, h, r);
 }
 
-// bezel screw positions: all in the solid top/bottom borders
-bezel_screw_x = [X0 + 8, W*0.25, W/2 - 14, W/2 + 14, W*0.75, X1 - 8];
-bezel_screws = [for (x = bezel_screw_x) for (y = [Y0 + border/2, Y1 - border/2]) [x, y]];
+// snap tab positions: [x, y, rotation]; rotation turns local +Y (inward)
+// to face into the frame from that edge. Kept clear of the cable slot.
+tab_x = [22, W/2 - 24, W/2 + 24, W - 22];
+tab_y = [H*0.28, H*0.72];
+snap_tabs = concat(
+    [for (x = tab_x) [x, Y0, 0]],       // bottom edge
+    [for (x = tab_x) [x, Y1, 180]],     // top edge
+    [for (y = tab_y) [X0, y, -90]],     // left edge
+    [for (y = tab_y) [X1, y, 90]]);     // right edge
+
+// local frame: X along the edge, Y inward from the outer face, Z up.
+// profile drawn as [inward n, z] with z = 0 at the bezel underside (z = DT)
+module at_edge(t) { translate([t[0], t[1], DT]) rotate([0, 0, t[2]]) children(); }
+module edge_extrude(w) { translate([-w/2, 0, 0]) rotate([90, 0, 90]) linear_extrude(w) children(); }
+
+module snap_tab() {                     // added to the bezel
+    edge_extrude(snap_w) polygon([
+        [0, eps], [0, -snap_len], [snap_t, -snap_len],
+        [snap_t + barb, -snap_len + barb_h], [snap_t, -snap_len + barb_h],
+        [snap_t, eps]]);
+}
+module snap_recess() {                  // cut from the tray
+    r = snap_t + snap_gap;
+    edge_extrude(snap_w + 2*snap_gap) polygon([
+        [-1, 1], [-1, -snap_len - pry_gap], [r, -snap_len - pry_gap], [r, 1]]);
+    // catch groove for the barb (flat top face holds the bezel down)
+    edge_extrude(snap_w + 2*snap_gap) polygon([
+        [r - eps, -snap_len - 0.4], [r + barb + 0.2, -snap_len - 0.4],
+        [r + barb + 0.2, -snap_len + barb_h + 0.05], [r - eps, -snap_len + barb_h + 0.05]]);
+    // lead-in chamfer on the top edge of the recess
+    edge_extrude(snap_w + 2*snap_gap) polygon([[r - eps, 1], [r + barb + 0.4, 1], [r - eps, -barb - 0.4]]);
+}
 
 // wall screw positions: in the back plate under the tablet
 wall_screws = [[22, 22], [22, H - 22], [W - 22, 22], [W - 22, H - 22],
@@ -110,8 +150,8 @@ module tray() {
             translate([0, 0, back_t - (wall_head_d - wall_screw_d)/2])
                 cylinder(d1 = wall_screw_d, d2 = wall_head_d, h = (wall_head_d - wall_screw_d)/2 + eps);
         }
-        // pilot holes for the bezel screws
-        for (p = bezel_screws) translate([p[0], p[1], DT - 10]) cylinder(d = m3_pilot, h = 11);
+        // snap-fit recesses + catch grooves in the outer walls
+        for (t = snap_tabs) at_edge(t) snap_recess();
     }
 }
 
@@ -129,13 +169,8 @@ module bezel() {
         // relief over the pockets so a chunky plug fits
         for (px = [-pocket_w, W])
             translate([px, 0, DT - eps]) cube([pocket_w, H, pocket_relief]);
-        // countersunk M3 holes
-        for (p = bezel_screws) translate([p[0], p[1], DT - 1]) {
-            cylinder(d = m3_clear, h = bezel_t + 2);
-            translate([0, 0, 1 + bezel_t - (m3_head - m3_clear)/2])
-                cylinder(d1 = m3_clear, d2 = m3_head, h = (m3_head - m3_clear)/2 + eps);
-        }
     }
+    for (t = snap_tabs) at_edge(t) snap_tab();
 }
 
 // ---------------------------------------------------------------- splitting
