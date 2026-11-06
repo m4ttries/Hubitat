@@ -212,7 +212,7 @@ module ghost() {
 
 if (part == "assembly") {
     color("SteelBlue") tray();
-    color("LightSteelBlue", 0.9) translate([0, 0, 0]) bezel();
+    color("LightSteelBlue") bezel();
     if (show_tablet) ghost();
 }
 else if (part == "tray")        tray();

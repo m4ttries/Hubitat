@@ -1,5 +1,7 @@
 # Fire HD 10 (13th gen, TG425K) Picture-Frame Wall Mount
 
+![front](preview_front.png)
+
 ![assembled](preview.png)
 
 A 3D-printable frame that goes all the way around the tablet and holds it **horizontally**: camera at the top middle, buttons and USB-C on the **right**.
