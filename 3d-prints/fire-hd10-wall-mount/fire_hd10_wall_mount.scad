@@ -51,19 +51,24 @@ pocket_floor = 2;   // back plate under the pockets (plug can sit lower)
 // round   : rounded front edge (bezel 1 mm thicker)
 // frame   : rounded outer edge + 45-degree bevel down to the screen
 // soft    : deep roundover, larger bevel to the screen, big corners (bezel 2 mm thicker)
+// frame_sq        : "frame" with square outer corners
+// frame_sq_window : "frame" with square outer corners AND a square screen opening
 edge_style = "sharp";
-// [bezel_t, corner_r, front_type, front_size, inner_bevel, back_chamfer]
-style = edge_style == "chamfer" ? [3, 8,  "chamfer", 2,   0,   1  ]
-      : edge_style == "round"   ? [4, 10, "round",   3,   0,   1  ]
-      : edge_style == "frame"   ? [4, 10, "round",   3,   2.5, 1  ]
-      : edge_style == "soft"    ? [5, 14, "round",   4,   3.5, 2  ]
-      :                           [3, 4,  "none",    0,   0,   0  ];
+// [bezel_t, corner_r, front_type, front_size, inner_bevel, back_chamfer, window_r]
+style = edge_style == "chamfer"   ? [3, 8,   "chamfer", 2, 0,   1, 3]
+      : edge_style == "round"     ? [4, 10,  "round",   3, 0,   1, 3]
+      : edge_style == "frame"     ? [4, 10,  "round",   3, 2.5, 1, 3]
+      : edge_style == "frame_sq"  ? [4, 0.01,"round",   3, 2.5, 1, 3]
+      : edge_style == "frame_sq_window" ? [4, 0.01, "round", 3, 2.5, 1, 0.01]
+      : edge_style == "soft"      ? [5, 14,  "round",   4, 3.5, 2, 3]
+      :                             [3, 4,   "none",    0, 0,   0, 3];
 bezel_t   = style[0];   // front frame thickness
 corner_r  = style[1];   // plan-view corner radius of the frame
 front_type = style[2];
 front_sz  = style[3];   // size of the front-edge chamfer / roundover
 inner_bev = style[4];   // 45-degree bevel from the bezel face down to the screen
 back_ch   = style[5];   // chamfer on the wall-side edge (makes it look thinner)
+window_r  = style[6];   // corner radius of the screen opening
 overlap  = screen_border - 0.5; // bezel covers the black border, stopping just short of the screen
 pocket_relief = 2;  // recess under the bezel above the pockets
 cam_notch_w = 26;   // bezel notch around the front camera (top middle)
@@ -117,7 +122,7 @@ function front_pts() =
                               [[ZT, 0]];
 function back_pts() = back_ch > 0 ? [[0, back_ch], [back_ch, 0]] : [[0, 0]];
 module outline(ins) {
-    rrect(X0 + ins, Y0 + ins, FW - 2*ins, FH - 2*ins, max(corner_r - ins, 0.5));
+    rrect(X0 + ins, Y0 + ins, FW - 2*ins, FH - 2*ins, max(corner_r - ins, 0.01));
 }
 module frame_body() {
     pts = concat(back_pts(), front_pts());
@@ -134,10 +139,10 @@ module frame_layer(z0, z1) {
 module screen_window() {
     hull() {
         translate([0, 0, DT - 1]) linear_extrude(bezel_t + 1 - inner_bev + 0.01)
-            rrect(overlap, overlap, W - 2*overlap, H - 2*overlap, 3);
+            rrect(overlap, overlap, W - 2*overlap, H - 2*overlap, window_r);
         translate([0, 0, ZT - 0.01]) linear_extrude(1)
             rrect(overlap - inner_bev, overlap - inner_bev,
-                  W - 2*overlap + 2*inner_bev, H - 2*overlap + 2*inner_bev, 3 + inner_bev);
+                  W - 2*overlap + 2*inner_bev, H - 2*overlap + 2*inner_bev, window_r + (window_r > 0.1 ? inner_bev : 0));
     }
 }
 
