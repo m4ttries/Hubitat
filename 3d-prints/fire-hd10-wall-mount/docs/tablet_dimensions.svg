@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1060" viewBox="0 0 1500 1060" font-family="Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#c0392b"/>
+    </marker>
+    <style>
+      .dim{stroke:#c0392b;stroke-width:1.6;fill:none;marker-start:url(#a);marker-end:url(#a)}
+      .ext{stroke:#c0392b;stroke-width:0.8;stroke-dasharray:4 3}
+      .lbl{fill:#c0392b;font-weight:700;font-size:22px}
+      .title{font-size:20px;font-weight:700;fill:#222}
+      .note{font-size:15px;fill:#444}
+      .th{font-size:15px;font-weight:700;fill:#222}
+      .td{font-size:15px;fill:#222}
+    </style>
+  </defs>
+  <rect width="1500" height="1060" fill="#fff"/>
+
+  <!-- ============ FRONT VIEW (scale 3.2 px/mm approx, 247 x 166 -> 790 x 531) ============ -->
+  <text x="110" y="45" class="title">FRONT (screen facing you, landscape, camera on top)</text>
+  <g transform="translate(110,95)">
+    <rect x="0" y="0" width="790" height="531" rx="29" fill="#2b2b2b"/>
+    <!-- screen -->
+    <rect x="48" y="48" width="694" height="435" fill="#6f8fb3"/>
+    <text x="395" y="270" text-anchor="middle" fill="#fff" font-size="20">visible screen (lit area)</text>
+    <!-- camera -->
+    <circle cx="395" cy="24" r="5" fill="#000" stroke="#999"/>
+
+    <!-- A overall width -->
+    <line class="ext" x1="0" y1="531" x2="0" y2="590"/><line class="ext" x1="790" y1="531" x2="790" y2="590"/>
+    <line class="dim" x1="2" y1="580" x2="788" y2="580"/>
+    <text x="395" y="606" text-anchor="middle" class="lbl">A</text>
+    <!-- B overall height -->
+    <line class="ext" x1="790" y1="0" x2="850" y2="0"/><line class="ext" x1="790" y1="531" x2="850" y2="531"/>
+    <line class="dim" x1="840" y1="2" x2="840" y2="529"/>
+    <text x="856" y="272" class="lbl">B</text>
+
+    <!-- E left border, F right border -->
+    <line class="dim" x1="2" y1="330" x2="46" y2="330"/><text x="10" y="320" class="lbl" fill="#c0392b">E</text>
+    <line class="dim" x1="744" y1="330" x2="788" y2="330"/><text x="756" y="320" class="lbl">F</text>
+    <!-- G top border, H bottom border -->
+    <line class="dim" x1="600" y1="2" x2="600" y2="46"/><text x="608" y="32" class="lbl">G</text>
+    <line class="dim" x1="600" y1="485" x2="600" y2="529"/><text x="608" y="515" class="lbl">H</text>
+
+    <!-- J camera from left edge -->
+    <line class="ext" x1="395" y1="0" x2="395" y2="-30"/>
+    <line class="dim" x1="2" y1="-22" x2="393" y2="-22"/><text x="200" y="-30" text-anchor="middle" class="lbl">J</text>
+    <!-- K camera from top edge -->
+    <line class="dim" x1="430" y1="2" x2="430" y2="22"/><text x="438" y="20" class="lbl">K</text>
+
+    <!-- D corner radius -->
+    <path d="M 22 120 Q 40 60 10 10" stroke="#c0392b" stroke-width="1.2" fill="none"/>
+    <text x="25" y="140" class="lbl">D</text>
+    <text x="45" y="140" class="note" fill="#c0392b">corner radius</text>
+
+    <text x="0" y="650" class="note">E, F, G, H = black border from the tablet's outer edge to where the lit screen starts.</text>
+  </g>
+
+  <!-- ============ RIGHT SIDE VIEW ============ -->
+  <text x="1010" y="45" class="title">RIGHT EDGE (buttons + USB-C side)</text>
+  <g transform="translate(1110,95)">
+    <!-- edge rect: thickness 8.6mm -> 60px wide (exaggerated), height 531 -->
+    <rect x="0" y="0" width="60" height="531" rx="18" fill="#3a3a3a"/>
+    <text x="-8" y="-8" class="note" text-anchor="end">back</text>
+    <text x="68" y="-8" class="note">screen side</text>
+    <!-- buttons -->
+    <rect x="22" y="70" width="16" height="40" rx="5" fill="#888"/>
+    <rect x="22" y="125" width="16" height="70" rx="5" fill="#888"/>
+    <!-- usb-c -->
+    <rect x="20" y="300" width="20" height="40" rx="9" fill="#111" stroke="#bbb"/>
+    <text x="70" y="325" class="note">USB-C</text>
+    <text x="70" y="140" class="note">buttons</text>
+    <!-- C thickness -->
+    <line class="ext" x1="0" y1="531" x2="0" y2="580"/><line class="ext" x1="60" y1="531" x2="60" y2="580"/>
+    <line class="dim" x1="2" y1="570" x2="58" y2="570"/><text x="22" y="598" class="lbl">C</text>
+    <!-- L port centre from bottom edge -->
+    <line class="ext" x1="40" y1="320" x2="-50" y2="320"/>
+    <line class="dim" x1="-40" y1="322" x2="-40" y2="529"/><text x="-70" y="440" class="lbl">L</text>
+    <!-- M port centre from back face -->
+    <line class="ext" x1="30" y1="340" x2="30" y2="380"/>
+    <line class="dim" x1="2" y1="372" x2="28" y2="372"/><text x="2" y="400" class="lbl">M</text>
+    <!-- N buttons from top: top of first button to bottom of last -->
+    <line class="ext" x1="38" y1="70" x2="100" y2="70"/><line class="ext" x1="38" y1="195" x2="100" y2="195"/>
+    <line class="dim" x1="-40" y1="2" x2="-40" y2="68"/><text x="-70" y="42" class="lbl">N</text>
+    <line class="dim" x1="92" y1="72" x2="92" y2="193"/><text x="100" y="175" class="lbl">P</text>
+  </g>
+
+  <!-- ============ PLUG ============ -->
+  <text x="1010" y="760" class="title">YOUR 90° USB-C PLUG</text>
+  <g transform="translate(1060,800)">
+    <rect x="0" y="40" width="40" height="22" fill="#bbb"/>               <!-- metal tip -->
+    <rect x="40" y="0" width="70" height="150" rx="8" fill="#eee" stroke="#555"/> <!-- body -->
+    <rect x="65" y="150" width="20" height="60" fill="#555"/>              <!-- cable -->
+    <text x="-5" y="35" class="note" text-anchor="end">into tablet</text>
+    <!-- Q length out from tablet edge -->
+    <line class="ext" x1="0" y1="62" x2="0" y2="230"/><line class="ext" x1="110" y1="150" x2="110" y2="230"/>
+    <line class="dim" x1="2" y1="222" x2="108" y2="222"/><text x="50" y="248" class="lbl">Q</text>
+    <!-- R body length -->
+    <line class="dim" x1="128" y1="2" x2="128" y2="148"/><text x="136" y="80" class="lbl">R</text>
+    <text x="136" y="100" class="note">body length</text>
+    <text x="175" y="20" class="note">S = body thickness</text>
+    <text x="175" y="40" class="note">(into the page)</text>
+  </g>
+
+  <!-- ============ TABLE ============ -->
+  <g transform="translate(110,770)">
+    <text x="0" y="0" class="th">Letter</text><text x="70" y="0" class="th">What</text><text x="540" y="0" class="th">I assumed (mm)</text><text x="690" y="0" class="th">Yours (mm)</text>
+    <g class="td">
+      <text x="0" y="26" class="lbl" font-size="16">A</text><text x="70" y="26" class="td">Overall width</text><text x="540" y="26" class="td">247.1</text>
+      <text x="0" y="48" class="lbl" font-size="16">B</text><text x="70" y="48" class="td">Overall height</text><text x="540" y="48" class="td">165.9</text>
+      <text x="0" y="70" class="lbl" font-size="16">C</text><text x="70" y="70" class="td">Thickness (thickest point)</text><text x="540" y="70" class="td">8.6</text>
+      <text x="0" y="92" class="lbl" font-size="16">D</text><text x="70" y="92" class="td">Corner radius (rough is fine)</text><text x="540" y="92" class="td">9</text>
+      <text x="0" y="114" class="lbl" font-size="16">E / F</text><text x="70" y="114" class="td">Left / right border to lit screen</text><text x="540" y="114" class="td">not used*</text>
+      <text x="0" y="136" class="lbl" font-size="16">G / H</text><text x="70" y="136" class="td">Top / bottom border to lit screen</text><text x="540" y="136" class="td">not used*</text>
+      <text x="0" y="158" class="lbl" font-size="16">J / K</text><text x="70" y="158" class="td">Camera centre from left edge / from top edge</text><text x="540" y="158" class="td">123.6 / 7.5</text>
+      <text x="0" y="180" class="lbl" font-size="16">L / M</text><text x="70" y="180" class="td">USB-C centre from bottom edge / from back face</text><text x="540" y="180" class="td">any / 4.3</text>
+      <text x="0" y="202" class="lbl" font-size="16">N / P</text><text x="70" y="202" class="td">Buttons: start from top edge / total span</text><text x="540" y="202" class="td">covered</text>
+      <text x="0" y="224" class="lbl" font-size="16">Q/R/S</text><text x="70" y="224" class="td">Plug: out from edge / body length / thickness</text><text x="540" y="224" class="td">≤20 / ≤30 / ≤10</text>
+    </g>
+    <text x="0" y="256" class="note">* The faceplate currently covers a fixed 7 mm on every side. With E–H it can cover exactly the black border, right up to the screen.</text>
+  </g>
+</svg>
