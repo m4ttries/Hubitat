@@ -1,159 +1,188 @@
-// Amazon Fire HD 10 (13th gen, model TG425K) - landscape wall mount
-// -------------------------------------------------------------------
-// Orientation (looking at the wall): camera top-middle, buttons and
-// USB-C on the RIGHT edge. The right edge is left completely open (only
-// a small stop at the very bottom-right corner) so a 90-degree USB-C
-// plug can be used, and the tablet is held off the wall by `back_t` so
-// the part of the plug that is thicker than the tablet clears the wall.
+// Amazon Fire HD 10 (13th gen, model TG425K) - landscape picture-frame wall mount
+// -----------------------------------------------------------------------------
+// Two parts:
+//   TRAY  - screws to the wall; the tablet drops into it face-up.
+//   BEZEL - a front frame that screws onto the tray and covers everything
+//           except the screen (with a notch for the front camera).
+// Both sides of the tablet have an equal hidden pocket, so the tablet sits
+// centred in the frame. The right pocket holds a 90-degree USB-C plug; the
+// cable leaves through a slot in the bottom edge or a hole in the back
+// (for running it into the wall).
 //
-// Mounting: screw the frame to the wall. Push the tablet's top edge up
-// under the two top hooks (there is `lift` mm of extra room), swing the
-// bottom in, and let it drop onto the bottom ledge behind the bottom lips.
+// Orientation (looking at the wall): camera top-middle, buttons + USB-C right.
+// Coordinates: X = across the wall, Y = up, Z = out of the wall.
 //
-// Coordinates: X = across the wall (left->right), Y = up, Z = out of wall.
-// Print with the back (Z=0) on the bed. No supports needed.
-//
-// part = "full"  : one piece (~256 x 189 mm - needs a 256+ mm bed)
-// part = "left" / "right" : two halves joined by a screwed lap joint at
-//                  the centre (each ~140 x 189 mm, fits any 220 mm bed)
-part = "full";
-show_tablet = false;   // preview only: ghost tablet + 90-degree USB-C plug
+// The frame is ~303 x 196 mm, so every part also comes as left/right halves
+// that fit a 220 mm bed. Tray halves overlap in a lap joint clamped by the
+// centre wall screws. Bezel halves butt together at the centre, and each
+// half is screwed to the tray on both sides of the seam.
+
+part = "assembly";  // assembly | tray | tray_left | tray_right | bezel | bezel_left | bezel_right
+show_tablet = true; // assembly preview only
 
 /* [Tablet] */
-tab_w = 247.1;     // landscape width  (Amazon spec 9.73")
-tab_h = 165.9;     // landscape height (Amazon spec 6.53")
-tab_t = 8.6;       // thickness        (Amazon spec 0.34")
-clear  = 0.8;      // total clearance added to width/height
-clear_t = 0.8;     // clearance added to thickness (use more for a skin/case)
+tab_w = 247.1;      // landscape width  (Amazon spec 9.73")
+tab_h = 165.9;      // landscape height (Amazon spec 6.53")
+tab_t = 8.6;        // thickness        (Amazon spec 0.34")
+clear   = 0.8;      // clearance added to width and height
+clear_t = 0.6;      // clearance added to thickness (add more for a skin)
 
 /* [Frame] */
-back_t   = 6;      // back plate thickness = stand-off from wall
-band     = 24;     // width of back frame rails
-wall     = 4;      // side/floor wall thickness
-lip_t    = 2.4;    // thickness of front retaining lips
-lip_bot  = 6;      // how far the bottom lips rise over the screen bezel
-lip_top  = 5;      // how far the top hooks reach down over the bezel
-lift     = 9;      // extra headroom at top for tilt-in insertion (> lip_bot)
-top_hook_w = 45;   // width of each top hook (camera is in the clear middle)
-side_stop_h = 14;  // height of corner side stops
-right_stop  = true;// small bottom-right stop; set false if it hits your plug
-center_bar  = 34;  // vertical centre bar width (carries lap joint)
+pocket_w = 22;      // hidden pocket each side (room for the 90-degree plug)
+outer    = 5;       // outer wall thickness
+border   = 14;      // top / bottom border width
+back_t   = 4;       // back plate under the tablet
+pocket_floor = 2;   // back plate under the pockets (plug can sit lower)
+bezel_t  = 3;       // front frame thickness
+overlap  = 7;       // how far the bezel covers the tablet's black border
+pocket_relief = 2;  // recess under the bezel above the pockets
+cam_notch_w = 26;   // bezel notch around the front camera (top middle)
+corner_stop = 11;   // side stops at the corners keep the tablet from sliding
+                    // into the pockets (they leave the middle of each edge open)
+
+/* [Cable] */
+cable_slot_w = 7;   // slot through the bottom edge (cable ~3.5-4.5 mm)
+wall_hole_d  = 12;  // hole through the back of the right pocket; 0 = none
 
 /* [Screws] */
-screw_d   = 4.5;   // #8 / 4mm wood screw clearance
-head_d    = 9;     // countersink diameter
-lap_screw_d = 4.5;
+wall_screw_d = 4.5; wall_head_d = 9;    // 4 mm / #8 wood screws
+m3_pilot = 2.6;     // M3 self-tapping / machine screw into plastic
+m3_clear = 3.4; m3_head = 6.4;
 
 $fn = 48;
+eps = 0.01;
 
 W = tab_w + clear;
 H = tab_h + clear;
 T = tab_t + clear_t;
-D = back_t + T + lip_t;     // total depth from wall
-eps = 0.01;
+S = pocket_w + outer;               // side border width (same both sides)
+X0 = -S;  X1 = W + S;               // outer extents
+Y0 = -border;  Y1 = H + border;
+DT = back_t + T;                    // tray height = tablet front face
+FW = X1 - X0;  FH = Y1 - Y0;
 
-// ---------- primitives ----------
-module rbox(size, r=2) {    // box rounded in XY
-    translate([r, r, 0]) linear_extrude(size[2])
-        offset(r) square([size[0]-2*r, size[1]-2*r]);
+// ---------------------------------------------------------------- helpers
+module rrect(x, y, w, h, r) {
+    translate([x + r, y + r]) offset(r) square([w - 2*r, h - 2*r]);
+}
+module rslab(x, y, w, h, z0, z1, r = 3) {
+    translate([0, 0, z0]) linear_extrude(z1 - z0) rrect(x, y, w, h, r);
 }
 
-module csk_hole(x, y) {     // countersunk from the FRONT face of back plate
-    translate([x, y, -1]) cylinder(d=screw_d, h=back_t+2);
-    translate([x, y, back_t-(head_d-screw_d)/2]) cylinder(d1=screw_d, d2=head_d, h=(head_d-screw_d)/2+eps);
-    translate([x, y, back_t]) cylinder(d=head_d, h=T+lip_t+1); // tool access
-}
+// bezel screw positions: all in the solid top/bottom borders
+bezel_screw_x = [X0 + 8, W*0.25, W/2 - 14, W/2 + 14, W*0.75, X1 - 8];
+bezel_screws = [for (x = bezel_screw_x) for (y = [Y0 + border/2, Y1 - border/2]) [x, y]];
 
-// ---------- back frame ----------
-module back_frame() {
-    x0 = -wall; x1 = W - 2;          // stops short of right edge (plug!)
-    y0 = -wall; y1 = H + lift + wall;
+// wall screw positions: in the back plate under the tablet
+wall_screws = [[22, 22], [22, H - 22], [W - 22, 22], [W - 22, H - 22],
+               [W/2, H*0.3], [W/2, H*0.7]];
+center_bar = 34;
+
+// ---------------------------------------------------------------- tray
+module tray() {
     difference() {
-        translate([x0, y0, 0]) rbox([x1-x0, y1-y0, back_t], 4);
-        // two windows either side of the centre bar
-        for (s = [[x0+band, W/2-center_bar/2], [W/2+center_bar/2, x1-band]])
-            translate([s[0], y0+band, -1])
-                rbox([s[1]-s[0], (y1-y0)-2*band, back_t+2], 6);
-    }
-}
+        rslab(X0, Y0, FW, FH, 0, DT, 4);
 
-// ---------- bottom ledge with lips ----------
-module bottom_segment(xa, xb) {
-    // floor
-    translate([xa, -wall, 0]) cube([xb-xa, wall, D]);
-    // front lip rising over the bezel
-    translate([xa, -wall, back_t+T]) cube([xb-xa, wall+lip_bot, lip_t]);
-}
-
-// ---------- top hook ----------
-module top_hook(xa, xb) {
-    translate([xa, H+lift, 0]) cube([xb-xa, wall, D]);
-    translate([xa, H-lip_top, back_t+T]) cube([xb-xa, lift+lip_top+wall, lip_t]);
-}
-
-// ---------- side stops ----------
-module left_stop(ya, yb) {
-    translate([-wall, ya, 0]) cube([wall, yb-ya, back_t+T]);
-}
-
-module mount() {
-    gap = 10;   // gap at the centre so nothing but the back frame crosses the split
-    difference() {
-        union() {
-            back_frame();
-            bottom_segment(-wall, W/2 - gap);
-            bottom_segment(W/2 + gap, W + (right_stop ? wall : 0));
-            top_hook(-wall, -wall + top_hook_w);
-            top_hook(W - 2 - top_hook_w, W - 2);
-            // left: stops only at the corners (keeps speakers/edge open)
-            left_stop(-wall, side_stop_h);
-            left_stop(H + lift - side_stop_h, H + lift + wall);
-            // right: only a short stop at the bottom corner
-            if (right_stop)
-                translate([W, -wall, 0]) cube([wall, side_stop_h, back_t+T]);
+        // tablet cavity
+        translate([0, 0, back_t]) cube([W, H, DT]);
+        // hidden pockets, left and right: full tablet height, open to the
+        // tablet cavity except for 3 mm stop ribs at the four corners
+        for (px = [-pocket_w, W]) {
+            translate([px, corner_stop, pocket_floor]) cube([pocket_w, H - 2*corner_stop, DT]);
+            translate([px + (px < 0 ? 0 : 3), 0, pocket_floor]) cube([pocket_w - 3, H, DT]);
         }
-        // wall screw holes (in the frame rails, outside the windows)
-        for (p = [[band/2 - wall, band/2 - wall],
-                  [band/2 - wall, H + lift + wall - band/2],
-                  [W - 2 - band/2, band/2 - wall],
-                  [W - 2 - band/2, H + lift + wall - band/2]])
-            csk_hole(p[0], p[1]);
-        // centre screws (also clamp the lap joint when printed in halves)
-        for (y = [H*0.3, H*0.7]) csk_hole(W/2, y);
+
+        // back windows (ventilation + less filament), either side of centre bar
+        for (s = [[24, W/2 - center_bar/2], [W/2 + center_bar/2, W - 24]])
+            translate([0, 0, -1]) linear_extrude(back_t + 2)
+                rrect(s[0], 34, s[1] - s[0], H - 68, 6);
+
+        // cable slot through the bottom edge, below the right pocket
+        translate([W + pocket_w/2 - cable_slot_w/2, Y0 - 1, -eps])
+            cube([cable_slot_w, border + corner_stop + 2, DT + 1]);
+        // optional hole straight into the wall behind the right pocket
+        if (wall_hole_d > 0)
+            translate([W + pocket_w/2, H/2, -1]) cylinder(d = wall_hole_d, h = pocket_floor + 2);
+
+        // wall screws, countersunk into the floor of the tablet cavity
+        for (p = wall_screws) translate([p[0], p[1], 0]) {
+            translate([0, 0, -1]) cylinder(d = wall_screw_d, h = back_t + 2);
+            translate([0, 0, back_t - (wall_head_d - wall_screw_d)/2])
+                cylinder(d1 = wall_screw_d, d2 = wall_head_d, h = (wall_head_d - wall_screw_d)/2 + eps);
+        }
+        // pilot holes for the bezel screws
+        for (p = bezel_screws) translate([p[0], p[1], DT - 10]) cylinder(d = m3_pilot, h = 11);
     }
 }
 
-// ---------- split into halves with a lap joint ----------
-lap = center_bar - 6;   // overlap width
-module half(side) {
-    big = 1000;
+// ---------------------------------------------------------------- bezel
+// modelled in place (z = DT .. DT + bezel_t)
+module bezel() {
+    difference() {
+        rslab(X0, Y0, FW, FH, DT, DT + bezel_t, 4);
+        // screen window
+        translate([0, 0, DT - 1]) linear_extrude(bezel_t + 2)
+            rrect(overlap, overlap, W - 2*overlap, H - 2*overlap, 3);
+        // camera notch, top middle
+        translate([W/2 - cam_notch_w/2, H - overlap - 1, DT - 1])
+            cube([cam_notch_w, overlap - 1.5, bezel_t + 2]);
+        // relief over the pockets so a chunky plug fits
+        for (px = [-pocket_w, W])
+            translate([px, 0, DT - eps]) cube([pocket_w, H, pocket_relief]);
+        // countersunk M3 holes
+        for (p = bezel_screws) translate([p[0], p[1], DT - 1]) {
+            cylinder(d = m3_clear, h = bezel_t + 2);
+            translate([0, 0, 1 + bezel_t - (m3_head - m3_clear)/2])
+                cylinder(d1 = m3_clear, d2 = m3_head, h = (m3_head - m3_clear)/2 + eps);
+        }
+    }
+}
+
+// ---------------------------------------------------------------- splitting
+lap = center_bar - 8;
+big = 2000;
+module tray_half(side) {
     intersection() {
-        mount();
-        if (side == "left")
-            union() {
-                translate([-big, -big, -big]) cube([big + W/2 - lap/2, 2*big, 2*big]);
-                translate([W/2 - lap/2 - eps, -big, -big]) cube([lap + 2*eps, 2*big, big + back_t/2]);
-            }
-        else
-            union() {
-                translate([W/2 + lap/2, -big, -big]) cube([big, 2*big, 2*big]);
-                translate([W/2 - lap/2, -big, back_t/2]) cube([lap + eps, 2*big, big]);
-            }
+        tray();
+        if (side == "left") union() {
+            translate([-big, -big, -big]) cube([big + W/2 - lap/2, 2*big, 2*big]);
+            translate([W/2 - lap/2 - eps, -big, -big]) cube([lap + 2*eps, 2*big, big + back_t/2]);
+        } else union() {
+            translate([W/2 + lap/2, -big, -big]) cube([big, 2*big, 2*big]);
+            translate([W/2 - lap/2, -big, back_t/2]) cube([lap + eps, 2*big, big]);
+        }
+    }
+}
+module bezel_half(side) {
+    intersection() {
+        bezel();
+        translate([side == "left" ? -big : W/2, -big, -big]) cube([big + (side == "left" ? W/2 : 0), 2*big, 2*big]);
+    }
+}
+// bezels print face-down: flip so the front face is on the bed
+module print_bezel() { translate([0, 0, DT + bezel_t]) mirror([0, 0, 1]) children(); }
+
+// ---------------------------------------------------------------- preview
+module ghost() {
+    color("DimGray") translate([clear/2, clear/2, back_t]) linear_extrude(tab_t)
+        rrect(0, 0, tab_w, tab_h, 9);
+    color("Black") translate([W/2, H - 7.5, back_t + tab_t]) cylinder(d = 3, h = 0.3);
+    // 90-degree USB-C plug, cable running down
+    color("White") translate([W, H*0.55, back_t + tab_t/2]) {
+        translate([0, -4, -1.6]) cube([5, 8, 3.2]);
+        translate([5, -22, -5]) cube([10, 30, 10]);
+        translate([10, -60, 0]) rotate([-90, 0, 0]) cylinder(d = 4, h = 40);
     }
 }
 
-module ghost() {
-    color("DimGray", 0.85) translate([clear/2, 0, back_t]) rbox([tab_w, tab_h, tab_t], 9);
-    color("Black") translate([clear/2 + tab_w/2, tab_h - 5, back_t + tab_t]) cylinder(d=3, h=0.3);
-    // right-angle USB-C plug on the right edge, cable heading down
-    color("White") translate([W, tab_h*0.6, back_t + tab_t/2]) {
-        translate([0, -3.5, -1.5]) cube([6, 7, 3]);
-        translate([6, -22, -4]) cube([10, 28, 8]);
-    }
+if (part == "assembly") {
+    color("SteelBlue") tray();
+    color("LightSteelBlue", 0.9) translate([0, 0, 0]) bezel();
+    if (show_tablet) ghost();
 }
-if (show_tablet) ghost();
-if (part == "full") mount();
-else if (part == "left") half("left");
-else if (part == "right")
-    // flip so the lap layer prints flat; back face still flat on bed
-    translate([0, 0, 0]) half("right");
+else if (part == "tray")        tray();
+else if (part == "tray_left")   tray_half("left");
+else if (part == "tray_right")  tray_half("right");
+else if (part == "bezel")       print_bezel() bezel();
+else if (part == "bezel_left")  print_bezel() bezel_half("left");
+else if (part == "bezel_right") print_bezel() bezel_half("right");
