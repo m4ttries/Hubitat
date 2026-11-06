@@ -45,7 +45,25 @@ outer    = 6;       // outer wall thickness (houses the snap recesses)
 border   = 14;      // top / bottom border width
 back_t   = 4;       // back plate under the tablet
 pocket_floor = 2;   // back plate under the pockets (plug can sit lower)
-bezel_t  = 3;       // front frame thickness
+/* [Edge style] */
+// sharp   : square edges (original)
+// chamfer : 45-degree chamfer on the front edge, small back chamfer
+// round   : rounded front edge (bezel 1 mm thicker)
+// frame   : rounded outer edge + 45-degree bevel down to the screen
+// soft    : deep roundover, larger bevel to the screen, big corners (bezel 2 mm thicker)
+edge_style = "sharp";
+// [bezel_t, corner_r, front_type, front_size, inner_bevel, back_chamfer]
+style = edge_style == "chamfer" ? [3, 8,  "chamfer", 2,   0,   1  ]
+      : edge_style == "round"   ? [4, 10, "round",   3,   0,   1  ]
+      : edge_style == "frame"   ? [4, 10, "round",   3,   2.5, 1  ]
+      : edge_style == "soft"    ? [5, 14, "round",   4,   3.5, 2  ]
+      :                           [3, 4,  "none",    0,   0,   0  ];
+bezel_t   = style[0];   // front frame thickness
+corner_r  = style[1];   // plan-view corner radius of the frame
+front_type = style[2];
+front_sz  = style[3];   // size of the front-edge chamfer / roundover
+inner_bev = style[4];   // 45-degree bevel from the bezel face down to the screen
+back_ch   = style[5];   // chamfer on the wall-side edge (makes it look thinner)
 overlap  = screen_border - 0.5; // bezel covers the black border, stopping just short of the screen
 pocket_relief = 2;  // recess under the bezel above the pockets
 cam_notch_w = 26;   // bezel notch around the front camera (top middle)
@@ -89,6 +107,40 @@ module rslab(x, y, w, h, z0, z1, r = 3) {
     translate([0, 0, z0]) linear_extrude(z1 - z0) rrect(x, y, w, h, r);
 }
 
+// Outer body of the whole frame (tray + bezel) with the chosen edge profile.
+// The outline is convex, so a hull of inset slices gives exact chamfers/rounds.
+ZT = DT + bezel_t;
+function front_pts() =
+    front_type == "chamfer" ? [[ZT - front_sz, 0], [ZT, front_sz]] :
+    front_type == "round"   ? [for (i = [0:10]) let(a = 90*i/10)
+                                 [ZT - front_sz + front_sz*sin(a), front_sz - front_sz*cos(a)]] :
+                              [[ZT, 0]];
+function back_pts() = back_ch > 0 ? [[0, back_ch], [back_ch, 0]] : [[0, 0]];
+module outline(ins) {
+    rrect(X0 + ins, Y0 + ins, FW - 2*ins, FH - 2*ins, max(corner_r - ins, 0.5));
+}
+module frame_body() {
+    pts = concat(back_pts(), front_pts());
+    hull() for (p = pts)
+        translate([0, 0, min(p[0], ZT - 0.01)]) linear_extrude(0.01) outline(p[1]);
+}
+module frame_layer(z0, z1) {
+    intersection() {
+        frame_body();
+        translate([X0 - 1, Y0 - 1, z0]) cube([FW + 2, FH + 2, z1 - z0]);
+    }
+}
+// screen window through the bezel, with optional 45-degree bevel
+module screen_window() {
+    hull() {
+        translate([0, 0, DT - 1]) linear_extrude(bezel_t + 1 - inner_bev + 0.01)
+            rrect(overlap, overlap, W - 2*overlap, H - 2*overlap, 3);
+        translate([0, 0, ZT - 0.01]) linear_extrude(1)
+            rrect(overlap - inner_bev, overlap - inner_bev,
+                  W - 2*overlap + 2*inner_bev, H - 2*overlap + 2*inner_bev, 3 + inner_bev);
+    }
+}
+
 // snap tab positions: [x, y, rotation]; rotation turns local +Y (inward)
 // to face into the frame from that edge. Kept clear of the cable slot.
 tab_x = [22, W/2 - 24, W/2 + 24, W - 22];
@@ -130,7 +182,7 @@ center_bar = 34;
 // ---------------------------------------------------------------- tray
 module tray() {
     difference() {
-        rslab(X0, Y0, FW, FH, 0, DT, 4);
+        frame_layer(0, DT);
 
         // tablet cavity
         translate([0, 0, back_t]) cube([W, H, DT]);
@@ -168,10 +220,9 @@ module tray() {
 // modelled in place (z = DT .. DT + bezel_t)
 module bezel() {
     difference() {
-        rslab(X0, Y0, FW, FH, DT, DT + bezel_t, 4);
+        frame_layer(DT, ZT);
         // screen window
-        translate([0, 0, DT - 1]) linear_extrude(bezel_t + 2)
-            rrect(overlap, overlap, W - 2*overlap, H - 2*overlap, 3);
+        screen_window();
         // camera notch, top middle
         translate([clear/2 + cam_x - cam_notch_w/2, H - overlap - 1, DT - 1])
             cube([cam_notch_w, overlap + 1 - (cam_y - cam_margin) - clear/2, bezel_t + 2]);
