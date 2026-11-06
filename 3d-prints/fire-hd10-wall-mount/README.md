@@ -58,7 +58,7 @@ These are the owner's measurements, entered into `fire_hd10_wall_mount.scad`. Th
 | D | Corner radius | not measured (9 assumed) | preview only |
 | E/F/G/H | Black border to lit screen, all four sides | 14.7 | `screen_border` |
 | J | Camera centre from left edge | 123 | `cam_x` |
-| K | Camera centre from top edge | not measured | covered by the 26 mm notch |
+| K | Camera centre from top edge | 7 | `cam_y` (the notch runs from the screen to 2.5 mm from the top edge) |
 | L | USB-C centre from bottom edge | 45.5 (approx.) | `port_y` |
 | M | USB-C centre from back face | C / 2 | |
 | N | Buttons start, from top edge | 19.3 | covered by the bezel |

@@ -31,6 +31,7 @@ tab_h = 165;        // B  landscape height (measured tight, so clearance is gene
 tab_t = 8.5;        // C  thickness
 screen_border = 14.7; // E/F/G/H  black border, edge of tablet -> lit screen (all four sides)
 cam_x  = 123;       // J  camera centre from the tablet's left edge
+cam_y  = 7;         // K  camera centre from the tablet's top edge
 port_y = 45.5;      // L  USB-C centre from the tablet's bottom edge (approx.)
                     // M  USB-C centre is mid-thickness (C/2)
                     // N = 19.3, P = 40.2: buttons start 19.3 mm from the top edge
@@ -48,6 +49,7 @@ bezel_t  = 3;       // front frame thickness
 overlap  = screen_border - 0.5; // bezel covers the black border, stopping just short of the screen
 pocket_relief = 2;  // recess under the bezel above the pockets
 cam_notch_w = 26;   // bezel notch around the front camera (top middle)
+cam_margin  = 4.5;  // notch extends this far beyond the camera centre (toward the top edge)
 corner_stop = 11;   // side stops at the corners keep the tablet from sliding
                     // into the pockets (they leave the middle of each edge open)
 
@@ -172,7 +174,7 @@ module bezel() {
             rrect(overlap, overlap, W - 2*overlap, H - 2*overlap, 3);
         // camera notch, top middle
         translate([clear/2 + cam_x - cam_notch_w/2, H - overlap - 1, DT - 1])
-            cube([cam_notch_w, overlap - 2.5, bezel_t + 2]);
+            cube([cam_notch_w, overlap + 1 - (cam_y - cam_margin) - clear/2, bezel_t + 2]);
         // relief over the pockets so a chunky plug fits
         for (px = [-pocket_w, W])
             translate([px, 0, DT - eps]) cube([pocket_w, H, pocket_relief]);
@@ -208,7 +210,7 @@ module print_bezel() { translate([0, 0, DT + bezel_t]) mirror([0, 0, 1]) childre
 module ghost() {
     color("DimGray") translate([clear/2, clear/2, back_t]) linear_extrude(tab_t)
         rrect(0, 0, tab_w, tab_h, 9);
-    color("Black") translate([clear/2 + cam_x, clear/2 + tab_h - 7.5, back_t + tab_t]) cylinder(d = 3, h = 0.3);
+    color("Black") translate([clear/2 + cam_x, clear/2 + tab_h - cam_y, back_t + tab_t]) cylinder(d = 3, h = 0.3);
     // 90-degree USB-C plug, cable running down
     color("White") translate([W, clear/2 + port_y, back_t + tab_t/2]) {
         translate([0, -4, -1.6]) cube([5, 8, 3.2]);
